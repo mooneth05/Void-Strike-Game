@@ -542,4 +542,269 @@ function drawPlayer(){
   ctx.fillStyle='#1a8fff';
   ctx.beginPath(); ctx.moveTo(x,y-20); ctx.lineTo(x-14,y+16); ctx.lineTo(x-6,y+10); ctx.lineTo(x+6,y+10); ctx.lineTo(x+14,y+16); ctx.closePath(); ctx.fill();
   ctx.fillStyle='#00f0ff';
-  ctx.beg
+  ctx.beginPath(); ctx.moveTo(x,y-14); ctx.lineTo(x-5,y+2); ctx.lineTo(x+5,y+2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#0a5fcc';
+  ctx.beginPath(); ctx.moveTo(x-6,y+4); ctx.lineTo(x-22,y+18); ctx.lineTo(x-14,y+16); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x+6,y+4); ctx.lineTo(x+22,y+18); ctx.lineTo(x+14,y+16); ctx.closePath(); ctx.fill();
+  if(state.spreadShot){
+    ctx.save(); ctx.strokeStyle='#ff44ff44'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(x,y-20); ctx.lineTo(x-40,y-80); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-20); ctx.lineTo(x+40,y-80); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawEnemy(e){
+  const x=e.x,y=e.y; e.wobble+=0.05;
+  const wy=Math.sin(e.wobble)*2;
+  const colors={basic:'#ff4466',fast:'#ffaa00',tank:'#aa44ff'};
+  const glow={basic:'#ff446644',fast:'#ffaa0044',tank:'#aa44ff44'};
+  const grd=ctx.createRadialGradient(x,y+wy,0,x,y+wy,20);
+  grd.addColorStop(0,glow[e.type]); grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(x,y+wy,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=colors[e.type];
+  if(e.type==='basic'){
+    ctx.beginPath(); ctx.moveTo(x,y+wy+11); ctx.lineTo(x-12,y+wy-8); ctx.lineTo(x-5,y+wy-4); ctx.lineTo(x+5,y+wy-4); ctx.lineTo(x+12,y+wy-8); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#ff8899'; ctx.beginPath(); ctx.arc(x,y+wy-2,4,0,Math.PI*2); ctx.fill();
+  } else if(e.type==='fast'){
+    ctx.beginPath(); ctx.moveTo(x,y+wy+13); ctx.lineTo(x-8,y+wy-11); ctx.lineTo(x+8,y+wy-11); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#ffe066'; ctx.beginPath(); ctx.arc(x,y+wy-2,3,0,Math.PI*2); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.roundRect(x-14,y+wy-10,28,20,4); ctx.fill();
+    ctx.fillStyle='#cc99ff';
+    for(let i=-1;i<=1;i++){ctx.beginPath();ctx.arc(x+i*8,y+wy,3,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle='#333'; ctx.fillRect(x-12,y+wy+12,24,3);
+    ctx.fillStyle='#aa44ff'; ctx.fillRect(x-12,y+wy+12,24*(e.hp/e.maxHp),3);
+  }
+}
+
+function drawBullet(b){
+  const grd=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,6);
+  grd.addColorStop(0,b.color||'#00ffcc'); grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(b.x,b.y,6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(b.x,b.y,2,0,Math.PI*2); ctx.fill();
+}
+
+function drawParticles(){
+  particles.forEach(p=>{ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});
+  ctx.globalAlpha=1;
+}
+
+// ── Update ──
+function update(){
+  const elapsed=(Date.now()-gameStartTime)/1000;
+  if(keys['ArrowLeft']||keys['KeyA']||touchLeft) player.x=Math.max(20,player.x-player.speed);
+  if(keys['ArrowRight']||keys['KeyD']||touchRight) player.x=Math.min(W-20,player.x+player.speed);
+  state.playerX=player.x; state.playerY=player.y;
+
+  if(player.shootCooldown>0) player.shootCooldown--;
+  const shooting=keys['Space']||touchShoot;
+  const cooldown=Math.round(15*state.shootCooldownMult);
+  if(shooting&&player.shootCooldown<=0){
+    bullets.push({x:player.x,y:player.y-20,vx:0,vy:-10,color:'#00f0ff'});
+    if(state.spreadShot){
+      bullets.push({x:player.x,y:player.y-16,vx:-3,vy:-9,color:'#ff44ff'});
+      bullets.push({x:player.x,y:player.y-16,vx:3,vy:-9,color:'#ff44ff'});
+    }
+    player.shootCooldown=cooldown;
+  }
+
+  if(player.invincible>0) player.invincible--;
+
+  bullets=bullets.filter(b=>{b.x+=b.vx;b.y+=b.vy;return b.y>0&&b.x>0&&b.x<W;});
+  enemyBullets=enemyBullets.filter(b=>{b.y+=b.vy;return b.y<H;});
+
+  enemies.forEach(e=>{
+    e.x+=e.dx*state.enemySpeedMult;
+    if(e.x<20||e.x>W-20) e.dx*=-1;
+    if(--e.shootTimer<=0){
+      enemyBullets.push({x:e.x,y:e.y+14,vy:3+wave*0.3,color:'#ff4466'});
+      e.shootTimer=Math.max(30,90-wave*5)+Math.random()*40;
+    }
+  });
+
+  // Bullet → enemy
+  bullets.forEach((b,bi)=>{
+    enemies.forEach(e=>{
+      if(!e.alive) return;
+      if(Math.abs(b.x-e.x)<18&&Math.abs(b.y-e.y)<16){
+        bullets.splice(bi,1); e.hp--;
+        if(e.hp<=0){
+          e.alive=false;
+          const pts=e.type==='fast'?20:e.type==='tank'?50:10;
+          score+=pts; scoreDisplay.textContent=score;
+          if(score>hi){hi=score;hiDisplay.textContent=hi;}
+          showFloat('+'+pts,e.x,e.y-10,e.type==='fast'?'#ffaa00':e.type==='tank'?'#aa44ff':'#ff4466');
+          spawnParticles(e.x,e.y,e.type==='fast'?'#ffaa00':e.type==='tank'?'#aa44ff':'#ff4466',16);
+          Achievements.onKill(e.type);
+          Achievements.onScoreUpdate(score);
+        } else { spawnParticles(e.x,e.y,'#ffffff',5); }
+      }
+    });
+  });
+  enemies=enemies.filter(e=>e.alive);
+
+  // Enemy bullet → player
+  if(player.invincible<=0){
+    enemyBullets.forEach((b,bi)=>{
+      if(Math.abs(b.x-player.x)<16&&Math.abs(b.y-player.y)<20){
+        enemyBullets.splice(bi,1); lives--;
+        state.lives=lives; player.invincible=120;
+        spawnParticles(player.x,player.y,'#00f0ff',20);
+        updateHearts();
+        Achievements.onHit(lives,wave);
+        if(lives<=0) endGame();
+      }
+    });
+  }
+
+  // Enemy reaches bottom
+  enemies.forEach(e=>{
+    if(e.y>H-80&&player.invincible<=0){lives=0;state.lives=0;updateHearts();endGame();}
+  });
+
+  // Wave clear
+  if(enemies.length===0){
+    Achievements.onWaveClear(wave,lives,elapsed);
+    wave++; waveDisplay.textContent=wave;
+    score+=100; scoreDisplay.textContent=score;
+    if(score>hi){hi=score;hiDisplay.textContent=hi;}
+    showFloat('WAVE CLEAR +100',W/2,H/2,'#00f0ff');
+    Achievements.onScoreUpdate(score);
+    spawnWave();
+  }
+
+  Powerups.update(W,H,state);
+  if(state.lives!==lives){lives=state.lives;updateHearts();}
+
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.life-=p.decay;return p.life>0;});
+  tickFloats();
+}
+
+function updateHearts(){
+  for(let i=1;i<=3;i++) document.getElementById(`h${i}`).className='heart'+(i>lives?' dead':'');
+}
+
+// ── Overlay helpers ──
+function refreshPanels(highlightIdx=-1){
+  const lb=document.getElementById('panel-lb');
+  const ach=document.getElementById('panel-ach');
+  if(lb) lb.innerHTML=Leaderboard.renderHTML(highlightIdx);
+  if(ach) ach.innerHTML=Achievements.renderHTML();
+}
+
+function setupTabs(){
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const target=tab.dataset.tab;
+      const lb=document.getElementById('panel-lb');
+      const ach=document.getElementById('panel-ach');
+      if(lb) lb.style.display=target==='lb'?'':'none';
+      if(ach) ach.style.display=target==='ach'?'':'none';
+    });
+  });
+}
+
+// ── Game Over ──
+function endGame(){
+  gameRunning=false; gameOver=true;
+  if(score>hi){hi=score;hiDisplay.textContent=hi;}
+  const isHS=Leaderboard.isHighScore(score);
+
+  overlay.innerHTML=`
+    <h2>${lives<=0?'💥 GAME OVER':'🏆 VICTORY'}</h2>
+    <p>WAVE REACHED</p>
+    <div class="score-big">${wave}</div>
+    <p>SCORE</p>
+    <div class="score-big">${score.toLocaleString()}</div>
+    <p style="color:#555">HI-SCORE: ${hi.toLocaleString()}</p>
+    ${isHS?`
+      <p style="color:#ffdd00;font-size:0.72rem">🏆 NEW HIGH SCORE!</p>
+      <input id="nameInput" maxlength="8" placeholder="YOUR NAME" autocomplete="off"
+        style="background:transparent;border:1px solid #00f0ff44;color:#00f0ff;padding:6px 12px;
+               font-family:'Courier New',monospace;font-size:0.85rem;letter-spacing:0.2em;
+               text-align:center;text-transform:uppercase;outline:none;width:160px"/>
+      <button class="btn" id="submitBtn">SUBMIT SCORE</button>
+    `:''}
+    <button class="btn" id="replayBtn">▶ PLAY AGAIN</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="lb">🏆 SCORES</button>
+      <button class="tab" data-tab="ach">🎖️ ACHV</button>
+    </div>
+    <div id="panel-lb" class="panel"></div>
+    <div id="panel-ach" class="panel" style="display:none"></div>
+  `;
+  overlay.style.display='flex';
+  refreshPanels();
+  setupTabs();
+
+  if(isHS){
+    document.getElementById('submitBtn').addEventListener('click',()=>{
+      const name=document.getElementById('nameInput').value.trim()||'PILOT';
+      const rank=Leaderboard.submit(name,score,wave);
+      refreshPanels(rank);
+      document.getElementById('submitBtn').remove();
+      document.getElementById('nameInput').remove();
+    });
+  }
+  document.getElementById('replayBtn').addEventListener('click',startGame);
+}
+
+// ── Start ──
+function startGame(){
+  score=0;lives=3;wave=1;
+  state.lives=3;state.shootCooldownMult=1;state.spreadShot=false;state.enemySpeedMult=1;
+  bullets=[];enemyBullets=[];enemies=[];particles=[];floatTexts=[];
+  player.x=W/2;player.y=H-70;player.invincible=0;player.shootCooldown=0;
+  gameOver=false;gameRunning=true;gameStartTime=Date.now();
+  scoreDisplay.textContent=0;waveDisplay.textContent=1;
+  updateHearts();
+  overlay.style.display='none';
+  Powerups.reset();
+  Achievements.startGame();
+  spawnWave();
+  requestAnimationFrame(loop);
+}
+
+// ── Loop ──
+function loop(){
+  if(!gameRunning) return;
+  ctx.fillStyle='#020510'; ctx.fillRect(0,0,W,H);
+  drawStars(); update();
+  enemies.forEach(drawEnemy);
+  bullets.forEach(drawBullet);
+  enemyBullets.forEach(b=>drawBullet(b));
+  Powerups.draw(ctx);
+  Powerups.drawHUD(ctx);
+  drawParticles();
+  drawFloats();
+  drawPlayer();
+  requestAnimationFrame(loop);
+}
+
+// ── Init ──
+function initOverlay(){
+  overlay.innerHTML=`
+    <h2>VOID STRIKER</h2>
+    <p>DEFEND THE GALAXY</p>
+    <button class="btn" id="startBtn">▶ START GAME</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="lb">🏆 SCORES</button>
+      <button class="tab" data-tab="ach">🎖️ ACHV</button>
+    </div>
+    <div id="panel-lb" class="panel"></div>
+    <div id="panel-ach" class="panel" style="display:none"></div>
+    <p style="font-size:0.65rem;color:#333">← → to move &nbsp; SPACE to shoot</p>
+  `;
+  overlay.style.display='flex';
+  refreshPanels();
+  setupTabs();
+  document.getElementById('startBtn').addEventListener('click',startGame);
+}
+
+initOverlay();
+</script>
+</body>
+</html>

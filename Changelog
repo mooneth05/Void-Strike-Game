@@ -1,0 +1,99 @@
+# Changelog
+
+All notable changes to VOID STRIKER are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased]
+
+### Planned
+- Co-op local multiplayer (split keyboard)
+- Unlockable ship skins
+- Daily challenge mode with seeded wave patterns
+- Cloud leaderboard via optional backend
+
+---
+
+## [1.3.0] — 2025-06-01
+
+### Added
+- **Boss system** (`boss.js`) — every 5th wave now spawns a multi-phase boss with
+  spread, laser, and aimed-burst attacks; damage phases change color and aggression.
+- **Upgrade shop** (`shop.js`) — spend score between waves on fire rate, move speed,
+  bullet damage, shield recharge, spread-shot unlock, and score boost.
+- **Audio engine** (`audio.js`) — Web Audio API sound layer with procedural laser,
+  explosion, power-up, and boss sounds; mute toggle persists via localStorage.
+- **Stats tracker** (`stats.js`) — per-session and all-time stat tracking (kills,
+  playtime, nukes, perfect waves, etc.) with a new Stats tab in the post-game overlay.
+- `assets/` directory with logo, favicon, gameplay GIF, three screenshots, and four
+  WAV sound effects.
+
+### Changed
+- Wave difficulty curve steepened at waves 8–10; enemy count capped at 45.
+- Power-up spawn interval now scales more aggressively (floor lowered to 180 frames).
+- `hitsOnWave1` achievement check is now correctly reset per run.
+
+### Fixed
+- Touch controls occasionally toggled `touchShoot` on fast swipes — now guarded with
+  a minimum horizontal-movement threshold.
+- Score multiplier was not applied to nuke kills.
+- Spread-shot bullets could clip through the canvas left edge at extreme player positions.
+
+---
+
+## [1.2.1] — 2025-04-18
+
+### Fixed
+- `localStorage` JSON parse error on corrupted leaderboard entries no longer crashes
+  the game; entries are silently reset.
+- Achievement toast could stack multiple times on rapid fire-rate triggers.
+
+---
+
+## [1.2.0] — 2025-03-30
+
+### Added
+- 12 achievements with toast notifications and persistent unlock state.
+- `UNTOUCHABLE` achievement: complete wave 1 without being hit.
+- `LIGHTNING PILOT` achievement: clear wave 3 in under 30 seconds.
+- Leaderboard now stores pilot name (up to 8 characters), score, and wave reached.
+- Mobile touch controls: tap left/right thirds to move, centre to shoot.
+
+### Changed
+- Enemy `tank` type now has 3 HP and a purple tint; worth 50 points.
+- Power-up glow radius increased for better visibility on small screens.
+- Overlay tabs (SCORES / ACHIEVEMENTS) replace the single post-game screen.
+
+### Fixed
+- `fast` enemy type could spawn on wave 1 under certain wave-count calculations.
+- Spread-shot power-up was not correctly expiring after its duration.
+
+---
+
+## [1.1.0] — 2025-02-14
+
+### Added
+- Five power-up types: Shield (+1 life), Rapid Fire, Spread Shot, Nuke, Time Slow.
+- Active-effect HUD bars showing remaining duration.
+- Float text feedback when a power-up is collected.
+- Enemy bullet variance by type (`fast` enemies shoot more often).
+
+### Changed
+- Star-field density increased to 120 stars; scroll speed now varies per star.
+- Score displayed with `toLocaleString()` thousands separators.
+
+---
+
+## [1.0.0] — 2025-01-01
+
+### Added
+- Initial release: canvas-based space shooter with infinite wave progression.
+- Three enemy types: basic, fast, tank.
+- Player ship with keyboard (← → / A D + Space) and basic touch support.
+- Local hi-score persistence via `localStorage`.
+- Particle explosion system.
+- 3-lives system with invincibility frames after taking damage.
+- Responsive canvas capped at 480 × 560 px.
+

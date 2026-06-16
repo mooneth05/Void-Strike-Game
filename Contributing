@@ -1,0 +1,185 @@
+# Contributing to VOID STRIKER
+
+Thanks for taking an interest in improving VOID STRIKER! This is a single-file
+browser game — contributions are welcome whether you're fixing a typo, tuning
+game-feel numbers, or adding a whole new feature.
+
+---
+
+## Table of Contents
+
+1. [Getting started](#getting-started)
+2. [Project structure](#project-structure)
+3. [How to contribute](#how-to-contribute)
+4. [Code style](#code-style)
+5. [Adding features](#adding-features)
+6. [Reporting bugs](#reporting-bugs)
+7. [Pull request checklist](#pull-request-checklist)
+
+---
+
+## Getting started
+
+No build step required. Clone the repo and open `index.html` in a browser:
+
+```bash
+git clone https://github.com/your-org/void-striker.git
+cd void-striker
+# Open index.html in any modern browser, or use a local server:
+npx serve .
+```
+
+> **Tip:** Use a local server (e.g. `npx serve`, VS Code Live Server, or
+> Python's `python3 -m http.server`) so that `fetch()` calls for audio assets
+> work correctly.
+
+---
+
+## Project structure
+
+```
+void-striker/
+├── index.html        ← entire game (HTML + inline CSS + inline JS)
+├── audio.js          ← Web Audio sound engine
+├── boss.js           ← boss enemy system
+├── shop.js           ← between-wave upgrade shop
+├── stats.js          ← session & all-time statistics
+├── assets/
+│   ├── logo.png
+│   ├── favicon.ico
+│   ├── gameplay.gif
+│   ├── screenshots/
+│   └── sounds/
+│       ├── laser.wav
+│       ├── explosion.wav
+│       ├── powerup.wav
+│       └── boss.wav
+├── LICENSE
+├── CHANGELOG.md
+└── CONTRIBUTING.md   ← you are here
+```
+
+The game is intentionally zero-dependency. Please do not introduce npm
+packages, bundlers, or framework code. Vanilla JS only.
+
+---
+
+## How to contribute
+
+1. **Fork** the repository and create a branch from `main`:
+
+   ```bash
+   git checkout -b fix/spread-shot-clip
+   # or
+   git checkout -b feat/shield-recharge-animation
+   ```
+
+2. Make your changes. Keep commits focused — one logical change per commit.
+
+3. Test in at least two browsers (Chrome + Firefox recommended).
+
+4. Open a **pull request** against `main` and fill in the PR template.
+
+---
+
+## Code style
+
+- **No build tools.** All JavaScript is plain ES5/ES6 — no TypeScript, no JSX.
+- **IIFE modules.** Each module (`Boss`, `Shop`, `Stats`, `Audio`) is wrapped
+  in an IIFE returning a public API object. Follow the same pattern.
+- **`'use strict';`** at the top of every JS file.
+- **Constants in SCREAMING_SNAKE_CASE**, private variables prefixed with `_`.
+- **Tabs for indentation** (2-space visual width) to match the existing file.
+- Comments above non-obvious logic; JSDoc on every public function.
+- No `console.log` left in submitted code (use `console.warn` for
+  recoverable errors that a user might want to see in devtools).
+
+### Naming conventions
+
+| Thing          | Convention              | Example               |
+|----------------|-------------------------|-----------------------|
+| Module objects | PascalCase IIFE         | `const Boss = (() => …)()` |
+| Private vars   | `_camelCase`            | `let _boss = null`    |
+| Public methods | `camelCase`             | `Boss.checkBulletHit` |
+| Constants      | `SCREAMING_SNAKE_CASE`  | `const MAX_LIVES = 3` |
+| DOM ids        | `kebab-case`            | `id="shop-close-btn"` |
+
+---
+
+## Adding features
+
+### New enemy type
+
+1. Add the type string to the `type` field in `spawnWave()` in `index.html`.
+2. Add draw logic to `drawEnemy(ctx, e)`.
+3. Set appropriate `hp`, `shootTimer`, and scoring values.
+4. Document the new type in `CHANGELOG.md` under `[Unreleased]`.
+
+### New power-up
+
+1. Add an entry to `Powerups.TYPES` in `index.html`:
+   - `icon`, `color`, `glowColor`, `label`, `desc`, `duration`
+   - `apply(state)` — immediate effect
+   - `expire(state)` — cleanup when timer runs out (omit for instant effects)
+2. Test that `expire()` fully reverses `apply()`.
+
+### New achievement
+
+1. Add a descriptor to `Achievements.DEFS` in `index.html`:
+   - `id`, `icon`, `name`, `desc`, `check(session) → boolean`
+2. Ensure the session stat you rely on is incremented in the right callback
+   (`onKill`, `onHit`, `onWaveClear`, etc.).
+3. Add a unit-testable condition — keep `check()` pure.
+
+### New upgrade (shop)
+
+1. Add an entry to `Shop.CATALOGUE` in `shop.js`.
+2. Implement `effect(level)` returning a state-patch object.
+3. If the upgrade has a wave-start side-effect (like extra lives), handle it
+   in `applyWaveStartBonuses()`.
+
+### Audio
+
+1. Add the sound file to `assets/sounds/` (44 100 Hz mono WAV recommended).
+2. Register the filename in `Audio.FILES` in `audio.js`.
+3. Add a convenience method (e.g. `Audio.newSound()`).
+
+---
+
+## Reporting bugs
+
+Open a GitHub Issue and include:
+
+- **Browser & OS** — e.g. Chrome 124 on macOS 14
+- **Steps to reproduce** — be specific (wave number, power-ups active, etc.)
+- **Expected behaviour** vs **actual behaviour**
+- A screenshot or screen recording if possible
+
+Bug reports for mobile are especially appreciated — touch handling is tricky.
+
+---
+
+## Pull request checklist
+
+Before opening a PR, confirm:
+
+- [ ] Tested in Chrome and Firefox
+- [ ] No `console.log` left in the code
+- [ ] Public functions have JSDoc comments
+- [ ] `CHANGELOG.md` updated under `[Unreleased]`
+- [ ] PR title follows format: `fix: short description` or `feat: short description`
+- [ ] No new external dependencies introduced
+
+---
+
+## Code of conduct
+
+Be kind. Critique ideas, not people. We're all here because we enjoy making
+things. Low-effort disparagement of anyone's contribution will result in
+removal from the project.
+
+---
+
+*Thanks again — every bug fix, balancing tweak, and new feature makes the
+void a little more fun to strike.*
+

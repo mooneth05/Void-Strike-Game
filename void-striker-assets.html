@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID STRIKER — Assets</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0a; font-family:'Courier New',monospace; color:#555; padding:40px 20px; }
+h2 { color:#00f0ff44; font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:16px; }
+.asset-row { display:flex; gap:32px; flex-wrap:wrap; margin-bottom:48px; align-items:flex-start; }
+.asset-card { display:flex; flex-direction:column; gap:8px; }
+.asset-label { font-size:0.55rem; letter-spacing:0.3em; color:#333; text-transform:uppercase; }
+.dl { display:inline-block; margin-top:4px; font-size:0.55rem; letter-spacing:0.2em; color:#00f0ff66;
+  border:1px solid #00f0ff22; padding:3px 10px; cursor:pointer; text-decoration:none;
+  transition:all 0.2s; border-radius:2px; }
+.dl:hover { color:#00f0ff; border-color:#00f0ff44; }
+</style>
+</head>
+<body>
+
+<h2>⚡ Void Striker — Visual Assets</h2>
+
+<div class="asset-row">
+
+  <!-- LOGO: Full horizontal -->
+  <div class="asset-card">
+    <div class="asset-label">Logo — Horizontal (600×160)</div>
+    <svg id="logo-horiz" xmlns="http://www.w3.org/2000/svg" width="600" height="160" viewBox="0 0 600 160">
+      <defs>
+        <!-- deep space bg -->
+        <radialGradient id="lbg" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" stop-color="#060d1f"/>
+          <stop offset="100%" stop-color="#020510"/>
+        </radialGradient>
+        <!-- cyan glow on text -->
+        <filter id="cglow" x="-20%" y="-40%" width="140%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- tight glow for ship -->
+        <filter id="sglow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- lightning bolt clip -->
+        <linearGradient id="boltgrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="40%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#0055ff"/>
+        </linearGradient>
+        <linearGradient id="textgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00f0ff"/>
+          <stop offset="55%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#00aaff"/>
+        </linearGradient>
+        <linearGradient id="subgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#334466"/>
+          <stop offset="100%" stop-color="#445577"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background -->
+      <rect width="600" height="160" fill="url(#lbg)" rx="6"/>
+
+      <!-- Nebula blobs -->
+      <ellipse cx="120" cy="80" rx="90" ry="55" fill="#0022ff" opacity="0.05"/>
+      <ellipse cx="480" cy="75" rx="80" ry="50" fill="#220055" opacity="0.07"/>
+      <ellipse cx="300" cy="140" rx="160" ry="40" fill="#001133" opacity="0.15"/>
+
+      <!-- Star field -->
+      <g opacity="0.5">
+        <circle cx="30" cy="20" r="0.8" fill="#fff"/><circle cx="80" cy="55" r="0.5" fill="#fff"/>
+        <circle cx="150" cy="12" r="1" fill="#fff"/><circle cx="220" cy="38" r="0.6" fill="#fff"/>
+        <circle cx="310" cy="18" r="0.9" fill="#fff"/><circle cx="390" cy="42" r="0.5" fill="#fff"/>
+        <circle cx="450" cy="10" r="0.7" fill="#fff"/><circle cx="530" cy="30" r="1.1" fill="#fff"/>
+        <circle cx="570" cy="60" r="0.5" fill="#fff"/><circle cx="55" cy="130" r="0.6" fill="#fff"/>
+        <circle cx="190" cy="145" r="0.8" fill="#fff"/><circle cx="340" cy="150" r="0.5" fill="#fff"/>
+        <circle cx="490" cy="135" r="0.9" fill="#fff"/><circle cx="560" cy="148" r="0.6" fill="#fff"/>
+        <circle cx="420" cy="125" r="0.4" fill="#aef"/><circle cx="260" cy="8" r="0.7" fill="#aef"/>
+        <circle cx="100" cy="90" r="0.5" fill="#aef"/><circle cx="580" cy="110" r="0.8" fill="#aef"/>
+      </g>
+
+      <!-- Scan lines (subtle) -->
+      <rect width="600" height="160" fill="url(#scan)" opacity="0.03"/>
+
+      <!-- ── SHIP ICON ── -->
+      <g transform="translate(58,80)" filter="url(#sglow)">
+        <!-- Engine glow -->
+        <ellipse cx="0" cy="26" rx="14" ry="8" fill="#00f0ff" opacity="0.18"/>
+        <ellipse cx="0" cy="28" rx="7" ry="4" fill="#00f0ff" opacity="0.35"/>
+
+        <!-- Wings -->
+        <polygon points="-8,8 -28,28 -14,22" fill="#0a4488" opacity="0.9"/>
+        <polygon points="8,8 28,28 14,22" fill="#0a4488" opacity="0.9"/>
+        <!-- Wing edge glow -->
+        <line x1="-8" y1="8" x2="-28" y2="28" stroke="#00f0ff" stroke-width="1" opacity="0.4"/>
+        <line x1="8" y1="8" x2="28" y2="28" stroke="#00f0ff" stroke-width="1" opacity="0.4"/>
+
+        <!-- Body -->
+        <polygon points="0,-30 -14,20 -6,14 6,14 14,20" fill="#1a6fff" opacity="0.95"/>
+        <!-- Body highlight -->
+        <polygon points="0,-24 -5,4 5,4" fill="#00f0ff" opacity="0.55"/>
+        <!-- Cockpit -->
+        <ellipse cx="0" cy="-6" rx="5" ry="7" fill="#aaffff" opacity="0.3"/>
+        <!-- Tip glow -->
+        <circle cx="0" cy="-30" r="2.5" fill="#ffffff" opacity="0.8"/>
+        <circle cx="0" cy="-30" r="5" fill="#00f0ff" opacity="0.25"/>
+        <!-- Thruster -->
+        <polygon points="-5,20 5,20 3,28 -3,28" fill="#00f0ff" opacity="0.7"/>
+      </g>
+
+      <!-- Bullet trails from ship -->
+      <g opacity="0.35">
+        <rect x="53" y="18" width="3" height="18" rx="1.5" fill="#00f0ff"/>
+        <rect x="63" y="10" width="2" height="12" rx="1" fill="#00f0ff" opacity="0.5"/>
+      </g>
+
+      <!-- Divider line -->
+      <line x1="110" y1="35" x2="110" y2="125" stroke="#00f0ff" stroke-width="0.5" opacity="0.25"/>
+
+      <!-- ── WORDMARK ── -->
+      <g filter="url(#cglow)">
+        <!-- VOID -->
+        <text x="130" y="88"
+          font-family="'Courier New', monospace"
+          font-size="52"
+          font-weight="bold"
+          letter-spacing="8"
+          fill="url(#textgrad)"
+          opacity="0.97">VOID</text>
+      </g>
+
+      <!-- STRIKER — offset, slightly smaller, different weight feel -->
+      <text x="132" y="116"
+        font-family="'Courier New', monospace"
+        font-size="26"
+        font-weight="bold"
+        letter-spacing="14"
+        fill="#ffffff"
+        opacity="0.55">STRIKER</text>
+
+      <!-- Lightning bolt accent between words -->
+      <g transform="translate(333, 56)">
+        <polygon points="6,0 0,18 5,18 -1,36 8,14 3,14 9,0" fill="url(#boltgrad)" opacity="0.9"/>
+      </g>
+
+      <!-- Tagline -->
+      <text x="133" y="138"
+        font-family="'Courier New', monospace"
+        font-size="8"
+        letter-spacing="5"
+        fill="#334466">ENHANCED EDITION — DEFEND THE GALAXY</text>
+
+      <!-- Corner brackets -->
+      <g stroke="#00f0ff" stroke-width="1" fill="none" opacity="0.2">
+        <polyline points="8,8 8,2 14,2"/><polyline points="592,8 592,2 586,2"/>
+        <polyline points="8,152 8,158 14,158"/><polyline points="592,152 592,158 586,158"/>
+      </g>
+    </svg>
+    <a class="dl" id="dl-horiz" download="void-striker-logo-horizontal.svg">↓ Download SVG</a>
+  </div>
+
+</div>
+
+<h2>Logo — Icon only (256×256)</h2>
+<div class="asset-row">
+  <div class="asset-card">
+    <div class="asset-label">Dark background</div>
+    <svg id="logo-icon-dark" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+      <defs>
+        <radialGradient id="ibg-d" cx="50%" cy="50%" r="55%">
+          <stop offset="0%" stop-color="#0a1530"/>
+          <stop offset="100%" stop-color="#020510"/>
+        </radialGradient>
+        <filter id="iglow-d" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="iship-d" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#0044cc"/>
+        </linearGradient>
+        <radialGradient id="iglow-ring" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="transparent"/>
+          <stop offset="85%" stop-color="#00f0ff" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.12"/>
+        </radialGradient>
+      </defs>
+
+      <!-- BG -->
+      <rect width="256" height="256" rx="28" fill="url(#ibg-d)"/>
+
+      <!-- Outer ring glow -->
+      <circle cx="128" cy="118" r="90" fill="url(#iglow-ring)"/>
+      <circle cx="128" cy="118" r="88" fill="none" stroke="#00f0ff" stroke-width="0.5" opacity="0.12"/>
+
+      <!-- Stars -->
+      <g opacity="0.6">
+        <circle cx="40" cy="30" r="1"/><circle cx="90" cy="18" r="0.7"/><circle cx="170" cy="25" r="1.2"/>
+        <circle cx="215" cy="40" r="0.8"/><circle cx="30" cy="200" r="0.9"/><circle cx="220" cy="210" r="0.7"/>
+        <circle cx="60" cy="220" r="1"/><circle cx="200" cy="180" r="0.6"/><circle cx="50" cy="140" r="0.8"/>
+        <circle cx="210" cy="130" r="0.9"/>
+        <circle cx="40" cy="30" r="1" fill="#aef"/><circle cx="215" cy="40" r="0.8" fill="#aef"/>
+      </g>
+
+      <!-- Nebula -->
+      <ellipse cx="80" cy="100" rx="70" ry="50" fill="#0011ff" opacity="0.04"/>
+      <ellipse cx="180" cy="140" rx="60" ry="45" fill="#440066" opacity="0.05"/>
+
+      <!-- Engine exhaust glow -->
+      <ellipse cx="128" cy="188" rx="22" ry="10" fill="#00f0ff" opacity="0.2"/>
+      <ellipse cx="128" cy="192" rx="10" ry="5" fill="#00f0ff" opacity="0.4"/>
+      <!-- Thruster flame -->
+      <polygon points="120,180 136,180 132,200 124,200" fill="#00f0ff" opacity="0.6"/>
+      <polygon points="123,180 133,180 130,193 126,193" fill="#ffffff" opacity="0.5"/>
+
+      <!-- Ship body -->
+      <g filter="url(#iglow-d)">
+        <!-- Wings -->
+        <polygon points="100,130 60,175 88,165" fill="#0a3a88"/>
+        <polygon points="156,130 196,175 168,165" fill="#0a3a88"/>
+        <!-- Wing glow edges -->
+        <line x1="100" y1="130" x2="60" y2="175" stroke="#00f0ff" stroke-width="1.5" opacity="0.5"/>
+        <line x1="156" y1="130" x2="196" y2="175" stroke="#00f0ff" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- Body -->
+        <polygon points="128,42 100,130 108,118 128,124 148,118 156,130" fill="url(#iship-d)"/>
+        <!-- Body inner bright -->
+        <polygon points="128,52 114,110 128,116 142,110" fill="#ffffff" opacity="0.12"/>
+        <!-- Cockpit window -->
+        <ellipse cx="128" cy="96" rx="10" ry="14" fill="#aaffff" opacity="0.25"/>
+        <ellipse cx="128" cy="94" rx="5" ry="7" fill="#ffffff" opacity="0.15"/>
+
+        <!-- Nose tip glow -->
+        <circle cx="128" cy="42" r="5" fill="#ffffff" opacity="0.9"/>
+        <circle cx="128" cy="42" r="12" fill="#00f0ff" opacity="0.3"/>
+        <circle cx="128" cy="42" r="22" fill="#00f0ff" opacity="0.1"/>
+      </g>
+
+      <!-- Bullet streaks -->
+      <g opacity="0.45" filter="url(#iglow-d)">
+        <rect x="124" y="8" width="3" height="28" rx="1.5" fill="#00f0ff"/>
+        <rect x="112" y="14" width="2" height="18" rx="1" fill="#00f0ff" opacity="0.5"/>
+        <rect x="137" y="14" width="2" height="18" rx="1" fill="#00f0ff" opacity="0.5"/>
+      </g>
+
+      <!-- VS monogram bottom -->
+      <text x="128" y="230"
+        font-family="'Courier New',monospace" font-size="11" font-weight="bold"
+        letter-spacing="6" fill="#00f0ff" opacity="0.35" text-anchor="middle">VOID STRIKER</text>
+
+      <!-- Corner brackets -->
+      <g stroke="#00f0ff" stroke-width="1.2" fill="none" opacity="0.18">
+        <polyline points="14,14 14,6 22,6"/><polyline points="242,14 242,6 234,6"/>
+        <polyline points="14,242 14,250 22,250"/><polyline points="242,242 242,250 234,250"/>
+      </g>
+    </svg>
+    <a class="dl" id="dl-icon-dark" download="void-striker-icon-dark.svg">↓ Download SVG</a>
+  </div>
+
+  <div class="asset-card">
+    <div class="asset-label">Transparent background</div>
+    <svg id="logo-icon-trans" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"
+         style="background:repeating-conic-gradient(#1a1a1a 0% 25%, #111 0% 50%) 0 0/16px 16px">
+      <defs>
+        <filter id="iglow-t" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="iship-t" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#0044cc"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Engine exhaust -->
+      <ellipse cx="128" cy="188" rx="22" ry="10" fill="#00f0ff" opacity="0.25"/>
+      <ellipse cx="128" cy="192" rx="10" ry="5" fill="#00f0ff" opacity="0.5"/>
+      <polygon points="120,180 136,180 132,200 124,200" fill="#00f0ff" opacity="0.7"/>
+      <polygon points="123,180 133,180 130,193 126,193" fill="#ffffff" opacity="0.6"/>
+
+      <!-- Ship -->
+      <g filter="url(#iglow-t)">
+        <polygon points="100,130 60,175 88,165" fill="#0a3a88"/>
+        <polygon points="156,130 196,175 168,165" fill="#0a3a88"/>
+        <line x1="100" y1="130" x2="60" y2="175" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+        <line x1="156" y1="130" x2="196" y2="175" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+        <polygon points="128,42 100,130 108,118 128,124 148,118 156,130" fill="url(#iship-t)"/>
+        <polygon points="128,52 114,110 128,116 142,110" fill="#ffffff" opacity="0.14"/>
+        <ellipse cx="128" cy="96" rx="10" ry="14" fill="#aaffff" opacity="0.3"/>
+        <circle cx="128" cy="42" r="5" fill="#ffffff" opacity="0.95"/>
+        <circle cx="128" cy="42" r="14" fill="#00f0ff" opacity="0.35"/>
+        <circle cx="128" cy="42" r="26" fill="#00f0ff" opacity="0.12"/>
+      </g>
+
+      <!-- Bullet streaks -->
+      <g opacity="0.5" filter="url(#iglow-t)">
+        <rect x="124" y="4" width="3" height="32" rx="1.5" fill="#00f0ff"/>
+        <rect x="112" y="10" width="2" height="20" rx="1" fill="#00f0ff" opacity="0.55"/>
+        <rect x="137" y="10" width="2" height="20" rx="1" fill="#00f0ff" opacity="0.55"/>
+      </g>
+    </svg>
+    <a class="dl" id="dl-icon-trans" download="void-striker-icon-transparent.svg">↓ Download SVG</a>
+  </div>
+</div>
+
+<h2>Background — Game Banner (1280×640)</h2>
+<div class="asset-card" style="margin-bottom:48px">
+  <div class="asset-label">GitHub README / itch.io banner</div>
+  <svg id="bg-banner" xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640"
+       style="max-width:100%;height:auto;display:block">
+    <defs>
+      <radialGradient id="bbg" cx="38%" cy="45%" r="70%">
+        <stop offset="0%" stop-color="#081428"/>
+        <stop offset="60%" stop-color="#040a18"/>
+        <stop offset="100%" stop-color="#020510"/>
+      </radialGradient>
+      <radialGradient id="nebula1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#0033ff" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#0033ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="nebula2" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#6600cc" stop-opacity="0.10"/>
+        <stop offset="100%" stop-color="#6600cc" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="nebula3" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#003322" stop-opacity="0.14"/>
+        <stop offset="100%" stop-color="#003322" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="bglow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="bglow2" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="btextgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#00f0ff"/>
+        <stop offset="50%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#00aaff"/>
+      </linearGradient>
+      <linearGradient id="bship" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#00f0ff"/>
+        <stop offset="100%" stop-color="#0033bb"/>
+      </linearGradient>
+      <linearGradient id="bship2" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#0066ff" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#002299" stop-opacity="0.4"/>
+      </linearGradient>
+      <linearGradient id="enemy1" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ff4466"/>
+        <stop offset="100%" stop-color="#aa0033"/>
+      </linearGradient>
+      <linearGradient id="boltg" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="50%" stop-color="#00f0ff"/>
+        <stop offset="100%" stop-color="#0044ff"/>
+      </linearGradient>
+      <clipPath id="bclip">
+        <rect width="1280" height="640"/>
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#bclip)">
+    <!-- Base bg -->
+    <rect width="1280" height="640" fill="url(#bbg)"/>
+
+    <!-- Nebulas -->
+    <ellipse cx="300" cy="300" rx="350" ry="240" fill="url(#nebula1)"/>
+    <ellipse cx="980" cy="200" rx="280" ry="200" fill="url(#nebula2)"/>
+    <ellipse cx="640" cy="560" rx="400" ry="180" fill="url(#nebula3)"/>
+    <ellipse cx="1100" cy="500" rx="200" ry="150" fill="url(#nebula1)" opacity="0.6"/>
+
+    <!-- Horizontal scan line atmosphere -->
+    <rect width="1280" height="1" y="200" fill="#00f0ff" opacity="0.015"/>
+    <rect width="1280" height="1" y="400" fill="#00f0ff" opacity="0.01"/>
+
+    <!-- Stars — three depths -->
+    <g fill="#ffffff">
+      <!-- Far small -->
+      <g opacity="0.3">
+        <circle cx="45" cy="28" r="0.8"/><circle cx="120" cy="65" r="0.6"/><circle cx="200" cy="18" r="1"/>
+        <circle cx="290" cy="88" r="0.7"/><circle cx="380" cy="32" r="0.9"/><circle cx="460" cy="72" r="0.5"/>
+        <circle cx="540" cy="15" r="0.8"/><circle cx="620" cy="55" r="1.1"/><circle cx="700" cy="28" r="0.6"/>
+        <circle cx="790" cy="80" r="0.8"/><circle cx="870" cy="22" r="0.7"/><circle cx="950" cy="68" r="0.9"/>
+        <circle cx="1040" cy="38" r="0.6"/><circle cx="1130" cy="75" r="0.8"/><circle cx="1220" cy="20" r="1"/>
+        <circle cx="70" cy="180" r="0.7"/><circle cx="160" cy="220" r="0.5"/><circle cx="250" cy="160" r="0.9"/>
+        <circle cx="350" cy="195" r="0.6"/><circle cx="450" cy="240" r="0.8"/><circle cx="550" cy="170" r="0.7"/>
+        <circle cx="680" cy="210" r="1"/><circle cx="760" cy="155" r="0.6"/><circle cx="860" cy="230" r="0.8"/>
+        <circle cx="960" cy="175" r="0.9"/><circle cx="1060" cy="215" r="0.5"/><circle cx="1160" cy="190" r="0.7"/>
+        <circle cx="1250" cy="145" r="0.8"/><circle cx="30" cy="420" r="0.6"/><circle cx="140" cy="460" r="0.9"/>
+        <circle cx="240" cy="390" r="0.7"/><circle cx="330" cy="440" r="0.5"/><circle cx="430" cy="480" r="0.8"/>
+        <circle cx="530" cy="410" r="0.6"/><circle cx="630" cy="450" r="0.9"/><circle cx="730" cy="395" r="0.7"/>
+        <circle cx="830" cy="465" r="0.5"/><circle cx="930" cy="420" r="0.8"/><circle cx="1030" cy="475" r="0.6"/>
+        <circle cx="1130" cy="430" r="0.9"/><circle cx="1230" cy="460" r="0.7"/>
+        <circle cx="90" cy="580" r="0.8"/><circle cx="200" cy="610" r="0.5"/><circle cx="310" cy="570" r="0.7"/>
+        <circle cx="420" cy="620" r="0.9"/><circle cx="520" cy="590" r="0.6"/><circle cx="640" cy="625" r="0.8"/>
+        <circle cx="760" cy="575" r="0.5"/><circle cx="880" cy="615" r="0.7"/><circle cx="1000" cy="580" r="0.9"/>
+        <circle cx="1110" cy="610" r="0.6"/><circle cx="1240" cy="590" r="0.8"/>
+      </g>
+      <!-- Mid -->
+      <g opacity="0.55">
+        <circle cx="55" cy="100" r="1.2" fill="#aef"/><circle cx="180" cy="140" r="1" fill="#aef"/>
+        <circle cx="320" cy="55" r="1.4"/><circle cx="490" cy="130" r="1.1"/><circle cx="640" cy="80" r="1.3"/>
+        <circle cx="800" cy="120" r="1" fill="#aef"/><circle cx="940" cy="50" r="1.2"/><circle cx="1100" cy="110" r="1.4"/>
+        <circle cx="100" cy="500" r="1.1"/><circle cx="280" cy="540" r="1.3" fill="#aef"/><circle cx="500" cy="510" r="1"/>
+        <circle cx="700" cy="555" r="1.2"/><circle cx="900" cy="520" r="1.4"/><circle cx="1100" cy="545" r="1"/>
+      </g>
+      <!-- Near bright -->
+      <g opacity="0.85">
+        <circle cx="150" cy="310" r="1.8"/><circle cx="1100" cy="350" r="2"/><circle cx="640" cy="580" r="1.6"/>
+        <circle cx="280" cy="520" r="1.5" fill="#ccffff"/><circle cx="1000" cy="490" r="1.7" fill="#ccffff"/>
+      </g>
+    </g>
+
+    <!-- Enemy ships (background, small) -->
+    <g opacity="0.35" fill="url(#enemy1)">
+      <!-- top right cluster -->
+      <g transform="translate(950,80) scale(0.5)">
+        <polygon points="0,16 -14,-10 -6,-6 6,-6 14,-10"/>
+      </g>
+      <g transform="translate(1020,130) scale(0.6)">
+        <polygon points="0,16 -14,-10 -6,-6 6,-6 14,-10"/>
+      </g>
+      <g transform="translate(1090,70) scale(0.45)">
+        <polygon points="0,16 -14,-10 -6,-6 6,-6 14,-10"/>
+      </g>
+      <g transform="translate(1150,115) scale(0.55)">
+        <polygon points="0,16 -14,-10 -6,-6 6,-6 14,-10"/>
+      </g>
+      <g transform="translate(1060,160) scale(0.4)">
+        <polygon points="0,16 -14,-10 -6,-6 6,-6 14,-10"/>
+      </g>
+    </g>
+
+    <!-- Enemy bullets -->
+    <g opacity="0.3" fill="#ff4466">
+      <circle cx="960" cy="200" r="4" filter="url(#bglow)"/>
+      <circle cx="1050" cy="240" r="3" filter="url(#bglow)"/>
+      <circle cx="1120" cy="195" r="4" filter="url(#bglow)"/>
+      <rect x="958" y="205" width="3" height="80" rx="1.5" opacity="0.4"/>
+      <rect x="1048" y="245" width="3" height="60" rx="1.5" opacity="0.3"/>
+      <rect x="1118" y="200" width="3" height="90" rx="1.5" opacity="0.4"/>
+    </g>
+
+    <!-- MAIN PLAYER SHIP — large, center-left -->
+    <g transform="translate(340, 320)" filter="url(#bglow)">
+      <!-- Engine glow -->
+      <ellipse cx="0" cy="165" rx="50" ry="22" fill="#00f0ff" opacity="0.22"/>
+      <ellipse cx="0" cy="172" rx="25" ry="12" fill="#00f0ff" opacity="0.45"/>
+      <!-- Thruster flame -->
+      <polygon points="-20,155 20,155 14,200 -14,200" fill="#00f0ff" opacity="0.65"/>
+      <polygon points="-10,155 10,155 6,185 -6,185" fill="#ffffff" opacity="0.5"/>
+      <!-- Wings -->
+      <polygon points="-48,80 -130,160 -80,142" fill="#0a3a88"/>
+      <polygon points="48,80 130,160 80,142" fill="#0a3a88"/>
+      <line x1="-48" y1="80" x2="-130" y2="160" stroke="#00f0ff" stroke-width="2" opacity="0.5"/>
+      <line x1="48" y1="80" x2="130" y2="160" stroke="#00f0ff" stroke-width="2" opacity="0.5"/>
+      <!-- Wing inner detail -->
+      <polygon points="-48,80 -100,140 -80,142" fill="#0a2a66" opacity="0.8"/>
+      <polygon points="48,80 100,140 80,142" fill="#0a2a66" opacity="0.8"/>
+      <!-- Body -->
+      <polygon points="0,-160 -48,80 -22,58 22,58 48,80" fill="url(#bship)"/>
+      <!-- Body highlight -->
+      <polygon points="0,-148 -20,40 20,40" fill="#ffffff" opacity="0.1"/>
+      <!-- Cockpit -->
+      <ellipse cx="0" cy="-40" rx="18" ry="28" fill="#aaffff" opacity="0.22"/>
+      <ellipse cx="0" cy="-44" rx="9" ry="14" fill="#ffffff" opacity="0.14"/>
+      <!-- Tip glow -->
+      <circle cx="0" cy="-160" r="8" fill="#ffffff" opacity="0.95"/>
+      <circle cx="0" cy="-160" r="20" fill="#00f0ff" opacity="0.4"/>
+      <circle cx="0" cy="-160" r="40" fill="#00f0ff" opacity="0.14"/>
+      <circle cx="0" cy="-160" r="70" fill="#00f0ff" opacity="0.05"/>
+      <!-- Side cannons -->
+      <rect x="-52" y="20" width="8" height="40" rx="3" fill="#0a3a88"/>
+      <rect x="44" y="20" width="8" height="40" rx="3" fill="#0a3a88"/>
+      <circle cx="-48" cy="18" r="4" fill="#00f0ff" opacity="0.6"/>
+      <circle cx="48" cy="18" r="4" fill="#00f0ff" opacity="0.6"/>
+    </g>
+
+    <!-- Player bullet trails -->
+    <g filter="url(#bglow)">
+      <rect x="337" y="30" width="5" height="130" rx="2.5" fill="#00f0ff" opacity="0.7"/>
+      <rect x="337" y="30" width="5" height="130" rx="2.5" fill="#ffffff" opacity="0.3"/>
+      <rect x="309" y="50" width="3" height="90" rx="1.5" fill="#00f0ff" opacity="0.4"/>
+      <rect x="368" y="50" width="3" height="90" rx="1.5" fill="#00f0ff" opacity="0.4"/>
+    </g>
+
+    <!-- ── RIGHT SIDE WORDMARK ── -->
+    <g>
+      <!-- VOID big -->
+      <text x="580" y="252"
+        font-family="'Courier New', monospace"
+        font-size="148"
+        font-weight="bold"
+        letter-spacing="10"
+        fill="url(#btextgrad)"
+        opacity="0.97"
+        filter="url(#bglow)">VOID</text>
+
+      <!-- STRIKER -->
+      <text x="586" y="334"
+        font-family="'Courier New', monospace"
+        font-size="66"
+        font-weight="bold"
+        letter-spacing="22"
+        fill="#ffffff"
+        opacity="0.6">STRIKER</text>
+
+      <!-- Lightning bolt accent -->
+      <g transform="translate(1108, 140)" filter="url(#bglow)">
+        <polygon points="18,0 0,55 14,55 -4,110 24,42 8,42 26,0" fill="url(#boltg)" opacity="0.85"/>
+      </g>
+
+      <!-- Tagline -->
+      <text x="584" y="378"
+        font-family="'Courier New', monospace"
+        font-size="18"
+        letter-spacing="8"
+        fill="#334466">ENHANCED EDITION</text>
+
+      <!-- Divider -->
+      <line x1="584" y1="395" x2="1240" y2="395" stroke="#00f0ff" stroke-width="0.5" opacity="0.12"/>
+
+      <!-- Feature pills -->
+      <g font-family="'Courier New',monospace" font-size="13" letter-spacing="3" fill="#445566">
+        <text x="586" y="425">BOSS BATTLES</text>
+        <text x="586" y="448">SHIP UPGRADES</text>
+        <text x="586" y="471">ACHIEVEMENTS</text>
+        <text x="586" y="494">COMBO SYSTEM</text>
+        <text x="870" y="425">LEADERBOARD</text>
+        <text x="870" y="448">POWER-UPS</text>
+        <text x="870" y="471">WAVE SHOP</text>
+        <text x="870" y="494">3 SHIP TYPES</text>
+      </g>
+
+      <!-- Feature dots -->
+      <g fill="#00f0ff" opacity="0.4">
+        <circle cx="578" cy="421" r="2"/><circle cx="578" cy="444" r="2"/>
+        <circle cx="578" cy="467" r="2"/><circle cx="578" cy="490" r="2"/>
+        <circle cx="862" cy="421" r="2"/><circle cx="862" cy="444" r="2"/>
+        <circle cx="862" cy="467" r="2"/><circle cx="862" cy="490" r="2"/>
+      </g>
+
+      <!-- Bottom bar -->
+      <rect x="584" y="530" width="656" height="1" fill="#00f0ff" opacity="0.08"/>
+      <text x="586" y="554"
+        font-family="'Courier New',monospace" font-size="11" letter-spacing="4" fill="#223344">
+        DEFEND THE GALAXY — WAVE AFTER WAVE
+      </text>
+    </g>
+
+    <!-- Corner brackets -->
+    <g stroke="#00f0ff" stroke-width="1.5" fill="none" opacity="0.18">
+      <polyline points="20,20 20,6 34,6"/><polyline points="1260,20 1260,6 1246,6"/>
+      <polyline points="20,620 20,634 34,634"/><polyline points="1260,620 1260,634 1246,634"/>
+    </g>
+
+    <!-- Subtle vignette -->
+    <radialGradient id="vign" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </radialGradient>
+    <rect width="1280" height="640" fill="url(#vign)"/>
+    </g>
+  </svg>
+  <a class="dl" id="dl-banner" download="void-striker-banner.svg" style="margin-top:8px">↓ Download SVG</a>
+</div>
+
+<script>
+// Wire up download buttons to inline SVG data
+function makeDL(btnId, svgId, filename) {
+  const btn = document.getElementById(btnId);
+  const svg = document.getElementById(svgId);
+  if (!btn || !svg) return;
+  const data = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([data], {type:'image/svg+xml'});
+  btn.href = URL.createObjectURL(blob);
+  btn.download = filename;
+}
+window.addEventListener('load', () => {
+  makeDL('dl-horiz',      'logo-horiz',      'void-striker-logo-horizontal.svg');
+  makeDL('dl-icon-dark',  'logo-icon-dark',  'void-striker-icon-dark.svg');
+  makeDL('dl-icon-trans', 'logo-icon-trans', 'void-striker-icon-transparent.svg');
+  makeDL('dl-banner',     'bg-banner',       'void-striker-banner.svg');
+});
+</script>
+</body>
+</html>

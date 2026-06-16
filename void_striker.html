@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID STRIKER — Space Shooter</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #020510;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: #00f0ff;
+    font-size: 1.4rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px #00f0ff88;
+  }
+
+  #hud {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 10px;
+    color: #aaa;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+  }
+
+  #hud span { color: #00f0ff; font-weight: bold; }
+
+  #gameCanvas {
+    border: 1px solid #00f0ff33;
+    box-shadow: 0 0 40px #00f0ff22, inset 0 0 60px #00010a;
+    display: block;
+  }
+
+  #lives-bar {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .heart { color: #ff4466; font-size: 1.1rem; }
+  .heart.dead { color: #333; }
+
+  #overlay {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+    text-align: center;
+    padding: 30px;
+    background: rgba(2,5,16,0.88);
+    border: 1px solid #00f0ff44;
+    border-radius: 4px;
+    min-width: 280px;
+  }
+
+  #overlay h2 {
+    font-size: 1.6rem;
+    letter-spacing: 0.3em;
+    color: #00f0ff;
+    text-shadow: 0 0 20px #00f0ff;
+  }
+
+  #overlay p { color: #888; font-size: 0.8rem; letter-spacing: 0.1em; }
+  #overlay .score-big { font-size: 2rem; color: #fff; letter-spacing: 0.2em; }
+
+  #startBtn {
+    background: transparent;
+    border: 1px solid #00f0ff;
+    color: #00f0ff;
+    padding: 10px 32px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  #startBtn:hover {
+    background: #00f0ff;
+    color: #020510;
+  }
+
+  #controls {
+    margin-top: 10px;
+    color: #444;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>⚡ VOID STRIKER</h1>
+<div id="hud">
+  <div>SCORE: <span id="scoreDisplay">0</span></div>
+  <div>WAVE: <span id="waveDisplay">1</span></div>
+  <div>HI: <span id="hiDisplay">0</span></div>
+</div>
+
+<canvas id="gameCanvas" width="480" height="560"></canvas>
+
+<div id="lives-bar">
+  <span class="heart" id="h1">♥</span>
+  <span class="heart" id="h2">♥</span>
+  <span class="heart" id="h3">♥</span>
+</div>
+
+<div id="controls">← → / A D — Move &nbsp;|&nbsp; SPACE — Shoot &nbsp;|&nbsp; Mobile: tap sides to move, tap center to shoot</div>
+
+<div style="margin-top: 12px;">
+  <a href="https://orynth.dev/projects/xianxiaworldwuxia" target="_blank" rel="noopener">
+    <img src="https://orynth.dev/api/badge/xianxiaworldwuxia?theme=light&style=default" alt="Featured on Orynth" width="260" height="80" />
+  </a>
+</div>
+
+<div id="overlay">
+  <h2>VOID STRIKER</h2>
+  <p>DEFEND THE GALAXY</p>
+  <button id="startBtn">▶ START GAME</button>
+  <p style="font-size:0.7rem; color:#555">← → to move &nbsp; SPACE to shoot</p>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const waveDisplay = document.getElementById('waveDisplay');
+const hiDisplay = document.getElementById('hiDisplay');
+
+const W = canvas.width, H = canvas.height;
+let score = 0, hi = 0, lives = 3, wave = 1;
+let gameRunning = false, gameOver = false;
+
+// Stars
+const stars = Array.from({length: 120}, () => ({
+  x: Math.random() * W,
+  y: Math.random() * H,
+  r: Math.random() * 1.5 + 0.2,
+  speed: Math.random() * 0.8 + 0.2,
+  opacity: Math.random() * 0.7 + 0.2
+}));
+
+// Player
+const player = {
+  x: W / 2, y: H - 70, w: 36, h: 40,
+  speed: 5, dx: 0,
+  shoot: false, shootCooldown: 0,
+  invincible: 0
+};
+
+let bullets = [];
+let enemyBullets = [];
+let enemies = [];
+let particles = [];
+let explosions = [];
+
+const keys = {};
+
+// Input
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'Space') e.preventDefault();
+});
+document.addEventListener('keyup', e => keys[e.code] = false);
+
+// Touch controls
+let touchLeft = false, touchRight = false, touchShoot = false;
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    const x = t.clientX - canvas.getBoundingClientRect().left;
+    if (x < W * 0.33) touchLeft = true;
+    else if (x > W * 0.67) touchRight = true;
+    else touchShoot = true;
+  }
+}, {passive: false});
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  touchLeft = false; touchRight = false; touchShoot = false;
+}, {passive: false});
+
+function spawnWave() {
+  enemies = [];
+  const cols = Math.min(5 + wave, 9);
+  const rows = Math.min(1 + Math.floor(wave / 2), 4);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const type = r === 0 && wave > 2 ? 'fast' : (r >= rows - 1 && wave > 4 ? 'tank' : 'basic');
+      enemies.push({
+        x: 50 + c * (W - 100) / (cols - 1 || 1),
+        y: 50 + r * 50,
+        w: 28, h: 22,
+        type,
+        hp: type === 'tank' ? 3 : 1,
+        maxHp: type === 'tank' ? 3 : 1,
+        dx: (1 + wave * 0.2) * (Math.random() > 0.5 ? 1 : -1),
+        shootTimer: Math.random() * 120 + 60,
+        wobble: 0,
+        alive: true
+      });
+    }
+  }
+}
+
+function spawnParticles(x, y, color, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 3 + 1;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1, decay: Math.random() * 0.04 + 0.02,
+      r: Math.random() * 3 + 1,
+      color
+    });
+  }
+}
+
+function drawStars() {
+  stars.forEach(s => {
+    s.y += s.speed;
+    if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
+    ctx.globalAlpha = s.opacity;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawPlayer() {
+  const x = player.x, y = player.y;
+  if (player.invincible > 0 && Math.floor(player.invincible / 5) % 2 === 0) return;
+
+  const grd = ctx.createRadialGradient(x, y + 22, 0, x, y + 22, 18);
+  grd.addColorStop(0, '#00f0ff88');
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(x, y + 22, 18, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#1a8fff';
+  ctx.beginPath();
+  ctx.moveTo(x, y - 20);
+  ctx.lineTo(x - 14, y + 16);
+  ctx.lineTo(x - 6, y + 10);
+  ctx.lineTo(x + 6, y + 10);
+  ctx.lineTo(x + 14, y + 16);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#00f0ff';
+  ctx.beginPath();
+  ctx.moveTo(x, y - 14);
+  ctx.lineTo(x - 5, y + 2);
+  ctx.lineTo(x + 5, y + 2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#0a5fcc';
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y + 4);
+  ctx.lineTo(x - 22, y + 18);
+  ctx.lineTo(x - 14, y + 16);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(x + 6, y + 4);
+  ctx.lineTo(x + 22, y + 18);
+  ctx.lineTo(x + 14, y + 16);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawEnemy(e) {
+  const x = e.x, y = e.y;
+  e.wobble += 0.05;
+  const wy = Math.sin(e.wobble) * 2;
+
+  const colors = { basic: '#ff4466', fast: '#ffaa00', tank: '#aa44ff' };
+  const glow = { basic: '#ff446644', fast: '#ffaa0044', tank: '#aa44ff44' };
+
+  const grd = ctx.createRadialGradient(x, y + wy, 0, x, y + wy, 20);
+  grd.addColorStop(0, glow[e.type]);
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(x, y + wy, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = colors[e.type];
+
+  if (e.type === 'basic') {
+    ctx.beginPath();
+    ctx.moveTo(x, y + wy + 11);
+    ctx.lineTo(x - 12, y + wy - 8);
+    ctx.lineTo(x - 5, y + wy - 4);
+    ctx.lineTo(x + 5, y + wy - 4);
+    ctx.lineTo(x + 12, y + wy - 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ff8899';
+    ctx.beginPath();
+    ctx.arc(x, y + wy - 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (e.type === 'fast') {
+    ctx.beginPath();
+    ctx.moveTo(x, y + wy + 13);
+    ctx.lineTo(x - 8, y + wy - 11);
+    ctx.lineTo(x + 8, y + wy - 11);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ffe066';
+    ctx.beginPath();
+    ctx.arc(x, y + wy - 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.roundRect(x - 14, y + wy - 10, 28, 20, 4);
+    ctx.fill();
+    ctx.fillStyle = '#cc99ff';
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.arc(x + i * 8, y + wy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x - 12, y + wy + 12, 24, 3);
+    ctx.fillStyle = '#aa44ff';
+    ctx.fillRect(x - 12, y + wy + 12, 24 * (e.hp / e.maxHp), 3);
+  }
+}
+
+function drawBullet(b) {
+  const grd = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 6);
+  grd.addColorStop(0, b.color || '#00ffcc');
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function update() {
+  const moveLeft = keys['ArrowLeft'] || keys['KeyA'] || touchLeft;
+  const moveRight = keys['ArrowRight'] || keys['KeyD'] || touchRight;
+  if (moveLeft) player.x = Math.max(20, player.x - player.speed);
+  if (moveRight) player.x = Math.min(W - 20, player.x + player.speed);
+
+  if (player.shootCooldown > 0) player.shootCooldown--;
+  const shooting = keys['Space'] || touchShoot;
+  if (shooting && player.shootCooldown <= 0) {
+    bullets.push({ x: player.x, y: player.y - 20, vy: -10, color: '#00f0ff' });
+    player.shootCooldown = 15;
+  }
+
+  if (player.invincible > 0) player.invincible--;
+
+  bullets = bullets.filter(b => { b.y += b.vy; return b.y > 0; });
+  enemyBullets = enemyBullets.filter(b => { b.y += b.vy; return b.y < H; });
+
+  enemies.forEach(e => {
+    e.x += e.dx;
+    if (e.x < 20 || e.x > W - 20) e.dx *= -1;
+    e.shootTimer--;
+    if (e.shootTimer <= 0) {
+      enemyBullets.push({ x: e.x, y: e.y + 14, vy: 3 + wave * 0.3, color: '#ff4466' });
+      e.shootTimer = Math.max(30, 90 - wave * 5) + Math.random() * 40;
+    }
+  });
+
+  bullets.forEach((b, bi) => {
+    enemies.forEach((e, ei) => {
+      if (!e.alive) return;
+      if (Math.abs(b.x - e.x) < 18 && Math.abs(b.y - e.y) < 16) {
+        bullets.splice(bi, 1);
+        e.hp--;
+        if (e.hp <= 0) {
+          e.alive = false;
+          const pts = e.type === 'fast' ? 20 : e.type === 'tank' ? 50 : 10;
+          score += pts;
+          scoreDisplay.textContent = score;
+          spawnParticles(e.x, e.y, e.type === 'fast' ? '#ffaa00' : e.type === 'tank' ? '#aa44ff' : '#ff4466', 16);
+        } else {
+          spawnParticles(e.x, e.y, '#ffffff', 5);
+        }
+      }
+    });
+  });
+
+  enemies = enemies.filter(e => e.alive);
+
+  if (player.invincible <= 0) {
+    enemyBullets.forEach((b, bi) => {
+      if (Math.abs(b.x - player.x) < 16 && Math.abs(b.y - player.y) < 20) {
+        enemyBullets.splice(bi, 1);
+        lives--;
+        player.invincible = 120;
+        spawnParticles(player.x, player.y, '#00f0ff', 20);
+        updateHearts();
+        if (lives <= 0) endGame();
+      }
+    });
+  }
+
+  enemies.forEach(e => {
+    if (e.y > H - 80 && player.invincible <= 0) {
+      lives = 0;
+      updateHearts();
+      endGame();
+    }
+  });
+
+  if (enemies.length === 0) {
+    wave++;
+    waveDisplay.textContent = wave;
+    score += 100;
+    scoreDisplay.textContent = score;
+    spawnWave();
+  }
+
+  particles = particles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.05;
+    p.life -= p.decay;
+    return p.life > 0;
+  });
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function updateHearts() {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`h${i}`).className = 'heart' + (i > lives ? ' dead' : '');
+  }
+}
+
+function endGame() {
+  gameRunning = false;
+  gameOver = true;
+  if (score > hi) { hi = score; hiDisplay.textContent = hi; }
+
+  overlay.innerHTML = `
+    <h2>${lives <= 0 ? '💥 GAME OVER' : 'VICTORY'}</h2>
+    <p>WAVE REACHED</p>
+    <div class="score-big">${wave}</div>
+    <p>SCORE</p>
+    <div class="score-big">${score}</div>
+    <p style="color:#555">HI-SCORE: ${hi}</p>
+    <button id="startBtn">▶ PLAY AGAIN</button>
+  `;
+  overlay.style.display = 'flex';
+  document.getElementById('startBtn').addEventListener('click', startGame);
+}
+
+function startGame() {
+  score = 0; lives = 3; wave = 1;
+  bullets = []; enemyBullets = []; particles = [];
+  player.x = W / 2; player.y = H - 70;
+  player.invincible = 0; player.shootCooldown = 0;
+  gameOver = false; gameRunning = true;
+
+  scoreDisplay.textContent = 0;
+  waveDisplay.textContent = 1;
+  updateHearts();
+  overlay.style.display = 'none';
+  spawnWave();
+  requestAnimationFrame(loop);
+}
+
+function loop() {
+  if (!gameRunning) return;
+  ctx.fillStyle = '#020510';
+  ctx.fillRect(0, 0, W, H);
+
+  drawStars();
+  update();
+  enemies.forEach(drawEnemy);
+  bullets.forEach(drawBullet);
+  enemyBullets.forEach(b => drawBullet(b));
+  drawParticles();
+  drawPlayer();
+
+  requestAnimationFrame(loop);
+}
+
+startBtn.addEventListener('click', startGame);
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+/**
+ * stats.js — VOID STRIKER
+ * Tracks per-session and all-time cumulative statistics.
+ *
+ * Usage:
+ *   Stats.startSession();          // call at game start
+ *   Stats.record('kills', 1);      // increment a counter
+ *   Stats.record('score', 150);    // can also track max
+ *   Stats.endSession();            // persists to localStorage
+ *   Stats.renderHTML();            // returns an HTML string for the UI
+ */
+
+'use strict';
+
+const Stats = (() => {
+  const STORAGE_KEY = 'voidstriker_stats';
+
+  // ── Schema ────────────────────────────────────────────────────────────────
+  // Each stat has a type: 'sum' (accumulates) or 'max' (keeps highest value).
+  const SCHEMA = [
+    { id: 'gamesPlayed',     label: 'Games Played',       type: 'sum',  icon: '🎮' },
+    { id: 'totalKills',      label: 'Total Kills',         type: 'sum',  icon: '💥' },
+    { id: 'totalBulletsFired',label:'Bullets Fired',       type: 'sum',  icon: '⚡' },
+    { id: 'totalPowerups',   label: 'Power-ups Collected', type: 'sum',  icon: '🔋' },
+    { id: 'totalWavesCleared',label:'Waves Cleared',       type: 'sum',  icon: '🌊' },
+    { id: 'highScore',       label: 'High Score',          type: 'max',  icon: '⭐' },
+    { id: 'highWave',        label: 'Highest Wave',        type: 'max',  icon: '🚀' },
+    { id: 'highKillStreak',  label: 'Best Kill Streak',    type: 'max',  icon: '🔥' },
+    { id: 'totalPlaytime',   label: 'Total Playtime',      type: 'sum',  icon: '⏱️', format: 'time' },
+    { id: 'totalDamageTaken',label: 'Times Hit',           type: 'sum',  icon: '💔' },
+    { id: 'perfectWaves',    label: 'Perfect Waves',       type: 'sum',  icon: '👑' },
+    { id: 'nukesFired',      label: 'Nukes Fired',         type: 'sum',  icon: '☢️' },
+  ];
+
+  // ── Internal state ────────────────────────────────────────────────────────
+  let _allTime   = _blank();
+  let _session   = _blank();
+  let _sessionStart = 0;
+  let _killStreak   = 0;  // resets on taking damage
+
+  function _blank() {
+    const obj = {};
+    SCHEMA.forEach(s => { obj[s.id] = 0; });
+    return obj;
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────────────
+  function _load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) _allTime = { ..._blank(), ...JSON.parse(raw) };
+    } catch (_) {
+      _allTime = _blank();
+    }
+  }
+
+  function _save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(_allTime));
+    } catch (_) { /* storage full – silently skip */ }
+  }
+
+  // ── Merge session into all-time ───────────────────────────────────────────
+  function _merge() {
+    SCHEMA.forEach(({ id, type }) => {
+      if (type === 'sum') {
+        _allTime[id] = (_allTime[id] || 0) + (_session[id] || 0);
+      } else {
+        _allTime[id] = Math.max(_allTime[id] || 0, _session[id] || 0);
+      }
+    });
+  }
+
+  // ── Public API ────────────────────────────────────────────────────────────
+
+  /** Call at the start of each game. */
+  function startSession() {
+    _load();
+    _session      = _blank();
+    _sessionStart = performance.now();
+    _killStreak   = 0;
+    _session.gamesPlayed = 1;
+  }
+
+  /**
+   * Record a stat delta for the current session.
+   * @param {string} id    - stat id from SCHEMA
+   * @param {number} delta - amount to add (default 1)
+   */
+  function record(id, delta = 1) {
+    if (!(id in _session)) return;
+
+    if (id === 'highScore' || id === 'highWave' || id === 'highKillStreak') {
+      _session[id] = Math.max(_session[id], delta);
+    } else {
+      _session[id] += delta;
+    }
+
+    // Kill-streak tracking
+    if (id === 'totalKills') {
+      _killStreak++;
+      _session.highKillStreak = Math.max(_session.highKillStreak, _killStreak);
+    }
+    if (id === 'totalDamageTaken') {
+      _killStreak = 0;  // streak broken
+    }
+  }
+
+  /** Call at game-over or session end; persists to localStorage. */
+  function endSession() {
+    const elapsed = (performance.now() - _sessionStart) / 1000; // seconds
+    _session.totalPlaytime = Math.round(elapsed);
+    _merge();
+    _save();
+  }
+
+  /** Returns a copy of the current session stats. */
+  function getSession() { return { ..._session }; }
+
+  /** Returns a copy of all-time stats (loaded from storage). */
+  function getAllTime() { _load(); return { ..._allTime }; }
+
+  /** Resets all-time stats (asks for confirmation). */
+  function reset() {
+    _allTime = _blank();
+    _save();
+  }
+
+  // ── Formatting helpers ────────────────────────────────────────────────────
+  function _fmt(value, format) {
+    if (format === 'time') {
+      const h = Math.floor(value / 3600);
+      const m = Math.floor((value % 3600) / 60);
+      const s = value % 60;
+      if (h > 0) return `${h}h ${m}m`;
+      if (m > 0) return `${m}m ${s}s`;
+      return `${s}s`;
+    }
+    return value.toLocaleString();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  /**
+   * Returns an HTML string suitable for injection into the game overlay.
+   * @param {'session'|'alltime'} which
+   */
+  function renderHTML(which = 'alltime') {
+    _load();
+    const data = which === 'session' ? _session : _allTime;
+
+    const rows = SCHEMA.map(({ id, label, icon, format }) => {
+      const val = data[id] || 0;
+      return `
+        <div style="
+          display:flex;align-items:center;justify-content:space-between;
+          padding:5px 8px;border-bottom:1px solid #0d0d20;font-size:0.72rem;
+          letter-spacing:0.06em
+        ">
+          <span style="color:#555">
+            <span style="margin-right:6px">${icon}</span>${label}
+          </span>
+          <span style="color:#00f0ff;font-variant-numeric:tabular-nums">
+            ${_fmt(val, format)}
+          </span>
+        </div>`;
+    }).join('');
+
+    const title = which === 'session' ? 'THIS RUN' : 'ALL TIME';
+
+    return `
+      <div style="width:100%">
+        <div style="
+          text-align:center;color:#333;font-size:0.65rem;letter-spacing:0.2em;
+          padding:4px 0 6px;text-transform:uppercase
+        ">${title} STATS</div>
+        ${rows}
+      </div>`;
+  }
+
+  return {
+    startSession,
+    record,
+    endSession,
+    getSession,
+    getAllTime,
+    reset,
+    renderHTML,
+  };
+})();
+
+// Make available as ES module or global
+if (typeof module !== 'undefined') module.exports = Stats;
+
